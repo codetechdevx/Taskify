@@ -1,37 +1,53 @@
 const express = require("express");
 const cors = require("cors");
+const mongoose = require("mongoose");
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-let tasks = []; // in-memory for now
+mongoose.connect("mongodb://localhost:27017/Taskify_Db", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.error("MongoDB connection error:", err));
 
-// Get all tasks
-app.get("/api/tasks", (req, res) => {
+
+const taskSchema = new mongoose.Schema({
+  title: String,
+  description: String,
+  dueDate: String,
+  priority: { type: String, enum: ["Low", "Medium", "High"], default: "Low" },
+  status: { type: String, enum: ["Pending", "Completed"], default: "Pending" }
+});
+
+const Task = mongoose.model("Task", taskSchema);
+
+// Get single task by ID
+app.get("/api/tasks/:id", async (req, res) => {
+  const task = await Task.findById(req.params.id);
+  res.json(task);
+});
+
+app.get("/api/tasks", async (req, res) => {
+  const tasks = await Task.find();
   res.json(tasks);
 });
 
-// Create a task
-app.post("/api/tasks", (req, res) => {
-  const newTask = { id: Date.now(), ...req.body };
-  tasks.push(newTask);
-  res.status(201).json(newTask);
+app.post("/api/tasks", async (req, res) => {
+  const task = new Task(req.body);
+  await task.save();
+  res.status(201).json(task);
 });
 
-// Update a task
-app.put("/api/tasks/:id", (req, res) => {
-  const { id } = req.params;
-  tasks = tasks.map(task =>
-    task.id == id ? { ...task, ...req.body } : task
-  );
+app.put("/api/tasks/:id", async (req, res) => {
+  await Task.findByIdAndUpdate(req.params.id, req.body);
   res.json({ message: "Task updated" });
 });
 
-// Delete a task
-app.delete("/api/tasks/:id", (req, res) => {
-  const { id } = req.params;
-  tasks = tasks.filter(task => task.id != id);
+app.delete("/api/tasks/:id", async (req, res) => {
+  await Task.findByIdAndDelete(req.params.id);
   res.json({ message: "Task deleted" });
 });
 

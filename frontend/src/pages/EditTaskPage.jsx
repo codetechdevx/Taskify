@@ -7,12 +7,9 @@ function EditTaskPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/tasks")
+    fetch(`http://localhost:5000/api/tasks/${id}`)
       .then(res => res.json())
-      .then(data => {
-        const found = data.find(t => t.id == id);
-        setTask(found);
-      });
+      .then(data => setTask(data));
   }, [id]);
 
   const handleChange = (e) => {
@@ -40,7 +37,7 @@ function EditTaskPage() {
       <h1>Edit Task</h1>
       <input name="title" value={task.title} onChange={handleChange} />
       <textarea name="description" value={task.description} onChange={handleChange} />
-      <input type="date" name="dueDate" value={task.dueDate} onChange={handleChange} />
+      <input type="date" name="dueDate" value={task.dueDate || ""} onChange={handleChange} />
       <select name="priority" value={task.priority} onChange={handleChange}>
         <option>Low</option>
         <option>Medium</option>

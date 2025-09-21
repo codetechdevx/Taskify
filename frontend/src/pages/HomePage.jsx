@@ -26,12 +26,14 @@ function HomePage() {
 
       <ul>
         {filteredTasks.map(task => (
-          <li key={task.id}>
-            <Link to={`/tasks/${task.id}`}>{task.title}</Link> - {task.priority}
-          </li>
+            <li key={task._id}>
+            <Link to={`/tasks/${task._id}`}>{task.title}</Link> - {task.priority}
+            </li>
         ))}
-      </ul>
+    </ul>
 
+
+        
       <Link to="/tasks/new">Add Task</Link>
     </div>
   );
